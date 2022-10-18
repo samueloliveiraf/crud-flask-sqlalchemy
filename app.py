@@ -1,17 +1,15 @@
-from flask import (
-    Flask
-)
+from flask import Flask
 
+from data_config.data_base import init_app, make_celery
 from sqlalchemy.exc import SQLAlchemyError
-from orm.data_base import init_app
 from flask import (
     request,
     make_response
 )
 
+from data_config.data_base import db
 from sqlalchemy.orm import Session
 from models.user import User
-from orm.data_base import db
 
 
 def create_app():
@@ -22,9 +20,21 @@ def create_app():
 
 app = create_app()
 
+celery = make_celery(app)
+
+
+@celery.task(name='task_ola_mundo')
+def ola_mundo():
+    return 'ola_mundo_1'
+
+
+@celery.task(name='task_ola_mundo_2')
+def ola_mundo_2():
+    return 'ola_mundo_2'
+
 
 @app.route('/insert', methods=['POST'])
-def api_insert():
+def api_insertaa():
     data = request.get_json()
     email = data['email']
     username = data['username']
@@ -112,4 +122,4 @@ def api_list():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run()
+    app.run(host='0.0.0.0', port=5001)
